@@ -83,11 +83,11 @@
             panels.forEach((p, i) => { setTimeout(() => { p.style.backgroundColor = colors[(i + offset) % colors.length]; }, i * 15); });
         }, 3500);
 
-        const heartIcons = ['💚','💛','🩷','❤️','🧡','💙','🩵','💜','💗','💓','💞','💕','💖','💘','💝'];
+        const heartIcons = ['💚','💛','🩷','❤️','🧡','💙','🩵','💜','🖤','🩶','🤍','♥️','🤎'];
         const commonItems = ['🎈', '♨️', '💮']; // 💩以外
 
         function createSuperSparkles(x, y) {
-            for (let i = 0; i < 60; i++) { // 数を60個に増量
+            for (let i = 0; i < 111; i++) { // 数を60個に増量
                 const s = document.createElement('div');
                 s.className = 'sparkle'; s.innerText = '✨';
                 s.style.left = x + 'px'; s.style.top = y + 'px';
