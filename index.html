@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>究極聖域・激レア黄金💩祝祭</title>
+    <style>
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #fffafb;
+        }
+        
+        /* 背景パネル */
+        #bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; z-index: 1; opacity: 0.5; }
+        .panel { flex: 1; height: 100%; transition: background-color 1.5s ease; }
+
+        /* 全体の大きなモヤ */
+        #moya-layer {
+            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; z-index: 5;
+            background: radial-gradient(circle, rgba(255,182,193,0.3) 0%, rgba(182,208,255,0.3) 30%, rgba(182,255,208,0.3) 60%, rgba(255,255,255,0) 100%);
+            filter: blur(80px); animation: moyaRotate 25s infinite linear;
+        }
+        @keyframes moyaRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* ハートとオーラ */
+        #heart-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+        .heart-wrapper {
+            position: absolute; width: 100px; height: 100px; display: flex; justify-content: center; align-items: center;
+            animation: fuyofuyo 6s infinite alternate ease-in-out; pointer-events: auto;
+        }
+        .aura {
+            position: absolute; width: 80px; height: 80px; border-radius: 50%;
+            background: conic-gradient(from 0deg, #ffb7b7, #fffbb7, #b7ffb7, #b7ffff, #b7d8ff, #e2b7ff, #ffb7b7);
+            filter: blur(15px); opacity: 0.7; animation: auraSpin 3s infinite linear; z-index: -1;
+        }
+        @keyframes auraSpin { 0%{transform:rotate(0deg) scale(1);} 50%{transform:rotate(180deg) scale(1.2);} 100%{transform:rotate(360deg) scale(1);} }
+        .heart { font-size: 2.2rem; cursor: pointer; user-select: none; filter: drop-shadow(0 0 5px white); }
+        @keyframes fuyofuyo { 0% { transform: translate(0, 0) rotate(-10deg); } 100% { transform: translate(30px, -50px) rotate(10deg); } }
+
+        /* 通常ポップアップ */
+        .pop {
+            position: absolute; font-size: 8rem; pointer-events: none; z-index: 100;
+            animation: bowafua 0.7s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+        }
+        /* 巨大💩専用：さらに巨大化 */
+        .pop-giant {
+            position: absolute; font-size: 30rem; pointer-events: none; z-index: 150;
+            animation: giantBowafua 1.2s cubic-bezier(0.18, 0.89, 0.32, 1.5) forwards;
+        }
+        @keyframes bowafua { 0%{transform:translate(-50%,-50%) scale(0); opacity:0;} 45%{transform:translate(-50%,-50%) scale(1.5); opacity:1;} 100%{transform:translate(-50%,-50%) scale(1.2); opacity:0;} }
+        @keyframes giantBowafua { 0%{transform:translate(-50%,-50%) scale(0) rotate(-30deg); opacity:0;} 50%{transform:translate(-50%,-50%) scale(1.8) rotate(15deg); opacity:1; filter: drop-shadow(0 0 50px gold);} 100%{transform:translate(-50%,-50%) scale(1.5) rotate(0deg); opacity:0;} }
+
+        /* 超巨大キラキラ ✨ */
+        .sparkle {
+            position: absolute; font-size: 4rem; /* サイズアップ */
+            pointer-events: none; z-index: 200;
+            animation: sparkleMove 2s ease-out forwards;
+        }
+        @keyframes sparkleMove {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
+            50% { opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(2) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-layer"></div>
+    <div id="moya-layer"></div>
+    <div id="heart-layer"></div>
+
+    <script>
+        const bgLayer = document.getElementById('bg-layer');
+        const heartLayer = document.getElementById('heart-layer');
+        const colors = ['#FFC0CB', '#FFD1DC', '#FFE4E1', '#E6E6FA', '#F0F8FF', '#F5FFFA', '#FFFACD', '#FFEBCD', '#F0FFF0', '#F0FFFF', '#F5F5F5', '#FFF0F5'];
+        const panels = [];
+        for (let i = 0; i < 111; i++) {
+            const p = document.createElement('div');
+            p.className = 'panel'; p.style.backgroundColor = colors[i % colors.length];
+            bgLayer.appendChild(p); panels.push(p);
+        }
+        let offset = 0;
+        setInterval(() => {
+            offset++;
+            panels.forEach((p, i) => { setTimeout(() => { p.style.backgroundColor = colors[(i + offset) % colors.length]; }, i * 15); });
+        }, 3500);
+
+        const heartIcons = ['💚','💛','🩷','❤️','🧡','💙','🩵','💜','💗','💓','💞','💕','💖','💘','💝'];
+        const commonItems = ['🎈', '♨️', '💮']; // 💩以外
+
+        function createSuperSparkles(x, y) {
+            for (let i = 0; i < 60; i++) { // 数を60個に増量
+                const s = document.createElement('div');
+                s.className = 'sparkle'; s.innerText = '✨';
+                s.style.left = x + 'px'; s.style.top = y + 'px';
+                // より遠く、広く舞い散るように設定
+                s.style.setProperty('--tx', (Math.random() - 0.5) * 1200 + 'px');
+                s.style.setProperty('--ty', (Math.random() - 0.5) * 1200 + 'px');
+                s.style.animationDelay = (Math.random() * 0.2) + 's';
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 2000);
+            }
+        }
+
+        for (let i = 0; i < 111; i++) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'heart-wrapper';
+            wrapper.style.left = (Math.random() * 92) + '%'; wrapper.style.top = (Math.random() * 92) + '%';
+            wrapper.style.animationDelay = (Math.random() * 5) + 's';
+
+            const aura = document.createElement('div'); aura.className = 'aura';
+            aura.style.animationDelay = (Math.random() * 3) + 's';
+            
+            const h = document.createElement('div'); h.className = 'heart';
+            h.innerText = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+            
+            wrapper.appendChild(aura); wrapper.appendChild(h);
+            
+            const handleAction = (e) => {
+                const x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                const y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+                const p = document.createElement('div');
+
+                // 出現率の調整（10%で💩）
+                if (Math.random() < 0.1) {
+                    p.className = 'pop-giant';
+                    p.innerText = '💩';
+                    createSuperSparkles(x, y);
+                } else {
+                    p.className = 'pop';
+                    p.innerText = commonItems[Math.floor(Math.random() * commonItems.length)];
+                }
+                
+                p.style.left = x + 'px'; p.style.top = y + 'px';
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 1200);
+            };
+
+            wrapper.addEventListener('mousedown', handleAction);
+            wrapper.addEventListener('touchstart', (e) => { e.preventDefault(); handleAction(e); });
+            heartLayer.appendChild(wrapper);
+        }
+    </script>
+</body>
+</html>
