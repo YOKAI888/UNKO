@@ -41,7 +41,15 @@
         }
         .panel { 
             flex: 1; height: 100%; 
-            transition: background-color 1.5s ease; 
+            transition: background-color 1.5s ease;
+            pointer-events: none;
+            animation: panelFlip 8s infinite;
+            transform-style: preserve-3d;
+        }
+        
+        @keyframes panelFlip {
+            0%, 100% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
         }
 
         #heart-layer { 
@@ -140,13 +148,32 @@
         const sparkleCount = isMobile ? 50 : 400;
 
         // 背景パネル生成
-        const colors = ['#ffe0e6', '#fff5e0', '#e0ffe6', '#e0f5ff', '#f0e0ff'];
-        for (let i = 0; i < 5; i++) {
+        const colors = ['#ffe0e6', '#fff5e0', '#e0ffe6', '#e0f5ff', '#f0e0ff', '#ffe6f5', '#fff0e6', '#e6ffe0', '#e0f0ff', '#f5e0ff'];
+        const backColors = ['#ffc0d0', '#ffe0c0', '#c0ffc0', '#c0e0ff', '#e0c0ff', '#ffc0e0', '#ffd0c0', '#d0ffc0', '#c0d0ff', '#e0c0f0'];
+        const panelCount = isMobile ? 10 : 111;
+        for (let i = 0; i < panelCount; i++) {
             const panel = document.createElement('div');
             panel.className = 'panel';
-            panel.style.backgroundColor = colors[i];
+            panel.style.backgroundColor = colors[i % colors.length];
+            panel.style.animationDelay = (i * 0.05) + 's';
+            panel.dataset.frontColor = colors[i % colors.length];
+            panel.dataset.backColor = backColors[i % backColors.length];
             bgLayer.appendChild(panel);
         }
+        
+        // パネルの色変化アニメーション
+        setInterval(() => {
+            const panels = document.querySelectorAll('.panel');
+            panels.forEach((panel, i) => {
+                setTimeout(() => {
+                    const front = panel.dataset.frontColor;
+                    const back = panel.dataset.backColor;
+                    panel.dataset.frontColor = back;
+                    panel.dataset.backColor = front;
+                    panel.style.backgroundColor = back;
+                }, i * 30);
+            });
+        }, 8000);
 
         function createSuperSparkles(x, y) {
             const dist = isMobile ? 400 : 1200;
