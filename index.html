@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>究極聖域・激レア黄金💩祝祭【スマホ完全安定版】</title>
+    <title>究極聖域・激レア黄金💩祝祭【ズーム封印版】</title>
     <style>
         :root {
             --pop-size: 10rem;
@@ -14,9 +14,9 @@
 
         @media (max-width: 768px) {
             :root {
-                --pop-size: 6rem;    /* スマホで少し大きく */
-                --giant-size: 18rem;  /* スマホで見栄えのするサイズ */
-                --heart-size: 85px;   /* ★指で押しやすいよう大きく */
+                --pop-size: 6rem;
+                --giant-size: 18rem;
+                --heart-size: 85px;
                 --sparkle-dist: 450px;
             }
         }
@@ -24,9 +24,12 @@
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; background-color: #fffafb;
-            touch-action: none; /* ズーム・スクロールを完全に封印 */
+            /* ★重要：ダブルタップズームを含むあらゆるブラウザジェスチャーを無効化 */
+            touch-action: none; 
             font-family: sans-serif;
-            -webkit-user-select: none; /* 長押しで選択されないように */
+            -webkit-user-select: none;
+            /* iOS向けのズーム防止策 */
+            -webkit-text-size-adjust: none;
         }
         
         #bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; z-index: 1; opacity: 0.5; pointer-events: none; }
@@ -46,9 +49,9 @@
             display: flex; justify-content: center; align-items: center;
             animation: fuyofuyo 11s infinite alternate ease-in-out;
             cursor: pointer;
-            /* 当たり判定を視覚より少し広げるための余白 */
-            box-sizing: border-box;
             background: rgba(255,255,255,0.01); 
+            /* ★ここにも touch-action を指定して個別にガード */
+            touch-action: manipulation; 
         }
 
         .aura {
@@ -94,14 +97,12 @@
         const heartCount = isMobile ? 30 : 111;
         const sparkleCount = isMobile ? 50 : 400;
 
-        // 背景生成
         for (let i = 0; i < (isMobile ? 25 : 80); i++) {
             const p = document.createElement('div');
             p.className = 'panel'; p.style.backgroundColor = colors[i % colors.length];
             bgLayer.appendChild(p);
         }
         
-        // 💩とキラキラ生成
         function createSuperSparkles(x, y) {
             const dist = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sparkle-dist'));
             for (let i = 0; i < sparkleCount; i++) {
@@ -116,9 +117,8 @@
         }
 
         function handleAction(e) {
-            // イベントの重複発火を防ぐ
-            e.preventDefault();
-            e.stopPropagation();
+            // ★ここでの e.preventDefault() がダブルタップズームを防ぐ最大の鍵です
+            if (e.cancelable) e.preventDefault();
 
             let x, y;
             if (e.type === 'touchstart') {
@@ -143,7 +143,6 @@
             setTimeout(() => p.remove(), 1000);
         }
 
-        // ハート配置
         for (let i = 0; i < heartCount; i++) {
             const wrapper = document.createElement('div');
             wrapper.className = 'heart-wrapper';
@@ -157,14 +156,19 @@
             
             wrapper.appendChild(aura); wrapper.appendChild(h);
             
-            // スマホとPCでイベントを使い分ける（重要）
             if ('ontouchstart' in window) {
+                // {passive: false} にすることで、preventDefault() を有効にしてズームを阻止
                 wrapper.addEventListener('touchstart', handleAction, {passive: false});
             } else {
                 wrapper.addEventListener('mousedown', handleAction);
             }
             heartLayer.appendChild(wrapper);
         }
+
+        // ★ドキュメント全体でのダブルタップズームを念のため最終防衛線で阻止
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) e.preventDefault();
+        }, {passive: false});
     </script>
 </body>
 </html>
