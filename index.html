@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>究極聖域・激レア黄金💩祝祭【ズーム封印版】</title>
+    <title>究極聖域・激レア黄金💩祝祭【完全復活版】</title>
     <style>
         :root {
             --pop-size: 10rem;
@@ -16,7 +16,7 @@
             :root {
                 --pop-size: 6rem;
                 --giant-size: 18rem;
-                --heart-size: 85px;
+                --heart-size: 90px; /* さらに押しやすく */
                 --sparkle-dist: 450px;
             }
         }
@@ -24,17 +24,15 @@
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; background-color: #fffafb;
-            /* ★重要：ダブルタップズームを含むあらゆるブラウザジェスチャーを無効化 */
-            touch-action: none; 
+            /* touch-actionを manipulation に戻して「反応」を優先 */
+            touch-action: manipulation; 
             font-family: sans-serif;
             -webkit-user-select: none;
-            /* iOS向けのズーム防止策 */
-            -webkit-text-size-adjust: none;
+            user-select: none;
         }
         
         #bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; z-index: 1; opacity: 0.5; pointer-events: none; }
         .panel { flex: 1; height: 100%; transition: background-color 1.5s ease; }
-
         #moya-layer {
             position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; z-index: 5;
             background: radial-gradient(circle, rgba(255,182,193,0.3) 0%, rgba(182,208,255,0.3) 30%, rgba(182,255,208,0.3) 60%, rgba(255,255,255,0) 100%);
@@ -49,9 +47,9 @@
             display: flex; justify-content: center; align-items: center;
             animation: fuyofuyo 11s infinite alternate ease-in-out;
             cursor: pointer;
-            background: rgba(255,255,255,0.01); 
-            /* ★ここにも touch-action を指定して個別にガード */
-            touch-action: manipulation; 
+            /* 透過色を敷いて当たり判定を盤石に */
+            background: rgba(0,0,0,0); 
+            z-index: 20;
         }
 
         .aura {
@@ -66,20 +64,16 @@
         @keyframes fuyofuyo { 0% { transform: translate(0, 0) rotate(-10deg); } 100% { transform: translate(30px, -50px) rotate(10deg); } }
 
         .pop-common { position: absolute; pointer-events: none; z-index: 100; transform: translate(-50%, -50%); }
-        .pop { font-size: var(--pop-size); animation: bowafua 0.7s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; }
-        .pop-giant { font-size: var(--giant-size); animation: giantBowafua 1.2s cubic-bezier(0.18, 0.89, 0.32, 1.5) forwards; }
+        .pop { font-size: var(--pop-size); animation: bowafua 0.7s forwards; }
+        .pop-giant { font-size: var(--giant-size); animation: giantBowafua 1.2s forwards; }
 
         @keyframes bowafua { 0%{transform:translate(-50%,-50%) scale(0); opacity:0;} 45%{transform:translate(-50%,-50%) scale(1.5); opacity:1;} 100%{transform:translate(-50%,-50%) scale(1.2); opacity:0;} }
-        @keyframes giantBowafua { 
-            0% { transform: translate(-50%, -50%) scale(0) rotate(-45deg); opacity: 0; } 
-            50% { transform: translate(-50%, -50%) scale(1.4) rotate(20deg); opacity: 1; filter: drop-shadow(0 0 80px gold); } 
-            100% { transform: translate(-50%, -50%) scale(1.1) rotate(0deg); opacity: 0; } 
-        }
+        @keyframes giantBowafua { 0%{transform:translate(-50%,-50%) scale(0); opacity:0;} 50%{transform:translate(-50%,-50%) scale(1.4); opacity:1; filter: drop-shadow(0 0 50px gold);} 100%{transform:translate(-50%,-50%) scale(1.1); opacity:0;} }
 
-        .sparkle { position: absolute; font-size: 2.5rem; pointer-events: none; z-index: 200; animation: sparkleMove 1.8s ease-out forwards; }
+        .sparkle { position: absolute; font-size: 2.5rem; pointer-events: none; z-index: 200; animation: sparkleMove 1.8s forwards; }
         @keyframes sparkleMove {
-            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)) scale(2.5) rotate(720deg); opacity: 0; }
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(2.5); opacity: 0; }
         }
     </style>
 </head>
@@ -89,22 +83,13 @@
     <div id="heart-layer"></div>
 
     <script>
-        const bgLayer = document.getElementById('bg-layer');
         const heartLayer = document.getElementById('heart-layer');
-        const colors = ['#FFC0CB', '#FFD1DC', '#FFE4E1', '#E6E6FA', '#F0F8FF', '#F5FFFA', '#FFFACD', '#FFEBCD', '#F0FFF0', '#F0FFFF', '#F5F5F5', '#FFF0F5'];
-        
-        const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-        const heartCount = isMobile ? 30 : 111;
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         const sparkleCount = isMobile ? 50 : 400;
 
-        for (let i = 0; i < (isMobile ? 25 : 80); i++) {
-            const p = document.createElement('div');
-            p.className = 'panel'; p.style.backgroundColor = colors[i % colors.length];
-            bgLayer.appendChild(p);
-        }
-        
+        // 💩とキラキラ生成関数
         function createSuperSparkles(x, y) {
-            const dist = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sparkle-dist'));
+            const dist = isMobile ? 400 : 1200;
             for (let i = 0; i < sparkleCount; i++) {
                 const s = document.createElement('div');
                 s.className = 'sparkle'; s.innerText = '✨';
@@ -116,12 +101,11 @@
             }
         }
 
+        // 最も確実に反応するアクション関数
         function handleAction(e) {
-            // ★ここでの e.preventDefault() がダブルタップズームを防ぐ最大の鍵です
-            if (e.cancelable) e.preventDefault();
-
+            // イベント座標の取得を極限までシンプルに
             let x, y;
-            if (e.type === 'touchstart') {
+            if (e.touches && e.touches[0]) {
                 x = e.touches[0].clientX;
                 y = e.touches[0].clientY;
             } else {
@@ -143,32 +127,38 @@
             setTimeout(() => p.remove(), 1000);
         }
 
-        for (let i = 0; i < heartCount; i++) {
+        // ハート生成とイベント登録
+        const icons = ['💚','💛','🩷','❤️','🧡','💙','🩵','💜','🖤','🩶','🤍','♥️','🤎'];
+        for (let i = 0; i < (isMobile ? 30 : 111); i++) {
             const wrapper = document.createElement('div');
             wrapper.className = 'heart-wrapper';
             wrapper.style.left = (Math.random() * 80) + '%';
             wrapper.style.top = (Math.random() * 85) + '%';
-            wrapper.style.animationDelay = (Math.random() * 5) + 's';
+            
+            const h = document.createElement('div');
+            h.className = 'heart';
+            h.innerText = icons[i % icons.length];
+            
+            const aura = document.createElement('div');
+            aura.className = 'aura';
 
-            const aura = document.createElement('div'); aura.className = 'aura';
-            const h = document.createElement('div'); h.className = 'heart';
-            h.innerText = ['💚','💛','🩷','❤️','🧡','💙','🩵','💜','🖤','🩶','🤍','♥️','🤎'][Math.floor(Math.random() * 13)];
+            wrapper.appendChild(aura);
+            wrapper.appendChild(h);
+
+            // 【超重要】 pointerdown を使い、余計なオプションを排除してブラウザ任せにする
+            wrapper.addEventListener('pointerdown', handleAction);
             
-            wrapper.appendChild(aura); wrapper.appendChild(h);
-            
-            if ('ontouchstart' in window) {
-                // {passive: false} にすることで、preventDefault() を有効にしてズームを阻止
-                wrapper.addEventListener('touchstart', handleAction, {passive: false});
-            } else {
-                wrapper.addEventListener('mousedown', handleAction);
-            }
             heartLayer.appendChild(wrapper);
         }
 
-        // ★ドキュメント全体でのダブルタップズームを念のため最終防衛線で阻止
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 1) e.preventDefault();
-        }, {passive: false});
+        // 背景等は省略せず最小限の負荷で回す
+        const bg = document.getElementById('bg-layer');
+        for(let i=0; i<(isMobile?10:50); i++){
+            const d = document.createElement('div');
+            d.style.flex = "1";
+            d.style.backgroundColor = "#fffafb";
+            bg.appendChild(d);
+        }
     </script>
 </body>
 </html>
