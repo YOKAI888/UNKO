@@ -3,29 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>真・究極聖域・激レア黄金💩祝祭【極・光増量版】</title>
+    <title>究極聖域・激レア黄金💩祝祭【スマホ完全安定版】</title>
     <style>
         :root {
             --pop-size: 10rem;
             --giant-size: 50rem;
             --heart-size: 100px;
-            --sparkle-dist: 1200px; /* さらに遠くまで飛ばす */
+            --sparkle-dist: 1200px;
         }
 
         @media (max-width: 768px) {
             :root {
-                --pop-size: 5rem;
-                --giant-size: 15rem;
-                --heart-size: 70px;
-                --sparkle-dist: 400px;
+                --pop-size: 6rem;    /* スマホで少し大きく */
+                --giant-size: 18rem;  /* スマホで見栄えのするサイズ */
+                --heart-size: 85px;   /* ★指で押しやすいよう大きく */
+                --sparkle-dist: 450px;
             }
         }
 
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; background-color: #fffafb;
-            touch-action: none;
+            touch-action: none; /* ズーム・スクロールを完全に封印 */
             font-family: sans-serif;
+            -webkit-user-select: none; /* 長押しで選択されないように */
         }
         
         #bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; z-index: 1; opacity: 0.5; pointer-events: none; }
@@ -44,17 +45,21 @@
             position: absolute; width: var(--heart-size); height: var(--heart-size);
             display: flex; justify-content: center; align-items: center;
             animation: fuyofuyo 11s infinite alternate ease-in-out;
-            cursor: pointer; touch-action: none;
+            cursor: pointer;
+            /* 当たり判定を視覚より少し広げるための余白 */
+            box-sizing: border-box;
+            background: rgba(255,255,255,0.01); 
         }
 
         .aura {
-            position: absolute; width: 80%; height: 80%; border-radius: 50%;
+            position: absolute; width: 85%; height: 85%; border-radius: 50%;
             background: conic-gradient(from 0deg, #ffb7b7, #fffbb7, #b7ffb7, #b7ffff, #b7d8ff, #e2b7ff, #ffb7b7);
             filter: blur(15px); opacity: 0.7; animation: auraSpin 3s infinite linear; z-index: -1;
+            pointer-events: none;
         }
         @keyframes auraSpin { 0%{transform:rotate(0deg) scale(1);} 50%{transform:rotate(180deg) scale(1.2);} 100%{transform:rotate(360deg) scale(1);} }
 
-        .heart { font-size: calc(var(--heart-size) * 0.4); user-select: none; filter: drop-shadow(0 0 5px white); pointer-events: none; }
+        .heart { font-size: calc(var(--heart-size) * 0.5); user-select: none; filter: drop-shadow(0 0 5px white); pointer-events: none; }
         @keyframes fuyofuyo { 0% { transform: translate(0, 0) rotate(-10deg); } 100% { transform: translate(30px, -50px) rotate(10deg); } }
 
         .pop-common { position: absolute; pointer-events: none; z-index: 100; transform: translate(-50%, -50%); }
@@ -68,11 +73,10 @@
             100% { transform: translate(-50%, -50%) scale(1.1) rotate(0deg); opacity: 0; } 
         }
 
-        .sparkle { position: absolute; font-size: 2.5rem; pointer-events: none; z-index: 200; animation: sparkleMove 2s ease-out forwards; }
+        .sparkle { position: absolute; font-size: 2.5rem; pointer-events: none; z-index: 200; animation: sparkleMove 1.8s ease-out forwards; }
         @keyframes sparkleMove {
             0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
-            50% { opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)) scale(2.5) rotate(1080deg); opacity: 0; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(2.5) rotate(720deg); opacity: 0; }
         }
     </style>
 </head>
@@ -86,48 +90,44 @@
         const heartLayer = document.getElementById('heart-layer');
         const colors = ['#FFC0CB', '#FFD1DC', '#FFE4E1', '#E6E6FA', '#F0F8FF', '#F5FFFA', '#FFFACD', '#FFEBCD', '#F0FFF0', '#F0FFFF', '#F5F5F5', '#FFF0F5'];
         
-        const isMobile = window.innerWidth <= 768;
-        const heartCount = isMobile ? 35 : 111;
-        const sparkleCount = isMobile ? 40 : 400; // ★PC版は400個に増量！
-        const panelCount = isMobile ? 30 : 111;
+        const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        const heartCount = isMobile ? 30 : 111;
+        const sparkleCount = isMobile ? 50 : 400;
 
-        const panels = [];
-        for (let i = 0; i < panelCount; i++) {
+        // 背景生成
+        for (let i = 0; i < (isMobile ? 25 : 80); i++) {
             const p = document.createElement('div');
             p.className = 'panel'; p.style.backgroundColor = colors[i % colors.length];
-            bgLayer.appendChild(p); panels.push(p);
+            bgLayer.appendChild(p);
         }
         
-        let offset = 0;
-        setInterval(() => {
-            offset++;
-            panels.forEach((p, i) => { setTimeout(() => { p.style.backgroundColor = colors[(i + offset) % colors.length]; }, i * 15); });
-        }, 3500);
-
-        const heartIcons = ['💚','💛','🩷','❤️','🧡','💙','🩵','💜','🖤','🩶','🤍','♥️','🤎'];
-        const commonItems = ['🎈', '♨️', '💮'];
-
+        // 💩とキラキラ生成
         function createSuperSparkles(x, y) {
             const dist = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sparkle-dist'));
             for (let i = 0; i < sparkleCount; i++) {
                 const s = document.createElement('div');
                 s.className = 'sparkle'; s.innerText = '✨';
                 s.style.left = x + 'px'; s.style.top = y + 'px';
-                // PC版ではより爆発的な勢いで広がるように設定
                 s.style.setProperty('--tx', (Math.random() - 0.5) * dist + 'px');
                 s.style.setProperty('--ty', (Math.random() - 0.5) * dist + 'px');
-                // 発生タイミングをわずかにずらして「爆発の余韻」を演出
-                s.style.animationDelay = (Math.random() * 0.3) + 's';
                 document.body.appendChild(s);
-                setTimeout(() => s.remove(), 2300);
+                setTimeout(() => s.remove(), 1800);
             }
         }
 
         function handleAction(e) {
+            // イベントの重複発火を防ぐ
             e.preventDefault();
-            const touch = e.touches ? e.touches[0] : e;
-            const x = touch.clientX;
-            const y = touch.clientY;
+            e.stopPropagation();
+
+            let x, y;
+            if (e.type === 'touchstart') {
+                x = e.touches[0].clientX;
+                y = e.touches[0].clientY;
+            } else {
+                x = e.clientX;
+                y = e.clientY;
+            }
             
             const p = document.createElement('div');
             if (Math.random() < 0.1) {
@@ -136,24 +136,33 @@
                 createSuperSparkles(x, y);
             } else {
                 p.className = 'pop-common pop';
-                p.innerText = commonItems[Math.floor(Math.random() * commonItems.length)];
+                p.innerText = ['🎈', '♨️', '💮'][Math.floor(Math.random() * 3)];
             }
             p.style.left = x + 'px'; p.style.top = y + 'px';
             document.body.appendChild(p);
-            setTimeout(() => p.remove(), 1200);
+            setTimeout(() => p.remove(), 1000);
         }
 
+        // ハート配置
         for (let i = 0; i < heartCount; i++) {
             const wrapper = document.createElement('div');
             wrapper.className = 'heart-wrapper';
-            wrapper.style.left = (Math.random() * 88) + '%';
-            wrapper.style.top = (Math.random() * 88) + '%';
+            wrapper.style.left = (Math.random() * 80) + '%';
+            wrapper.style.top = (Math.random() * 85) + '%';
             wrapper.style.animationDelay = (Math.random() * 5) + 's';
+
             const aura = document.createElement('div'); aura.className = 'aura';
             const h = document.createElement('div'); h.className = 'heart';
-            h.innerText = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+            h.innerText = ['💚','💛','🩷','❤️','🧡','💙','🩵','💜','🖤','🩶','🤍','♥️','🤎'][Math.floor(Math.random() * 13)];
+            
             wrapper.appendChild(aura); wrapper.appendChild(h);
-            wrapper.addEventListener('pointerdown', handleAction);
+            
+            // スマホとPCでイベントを使い分ける（重要）
+            if ('ontouchstart' in window) {
+                wrapper.addEventListener('touchstart', handleAction, {passive: false});
+            } else {
+                wrapper.addEventListener('mousedown', handleAction);
+            }
             heartLayer.appendChild(wrapper);
         }
     </script>
